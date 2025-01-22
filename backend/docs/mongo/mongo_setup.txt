@@ -1,0 +1,61 @@
+Let's try to reset everything from scratch since you don't have admin access working:
+
+First, stop MongoDB:
+
+```brew services stop mongodb-community```
+
+Start MongoDB without access control (this bypasses authentication):
+
+mongod --dbpath /opt/homebrew/var/mongodb --noauth
+
+Open a new terminal window and connect (this should work without credentials):
+
+mongosh
+
+Once connected, create the new admin user:
+
+javascriptCopyuse admin
+db.createUser(
+  {
+    user: "adminUser",
+    pwd: "newSecurePassword",  // make sure to use a new secure password
+    roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
+  }
+)
+
+After that succeeds, exit mongosh and stop MongoDB (Ctrl+C in the terminal running mongod)
+Restart MongoDB normally:
+
+brew services start mongodb-community
+
+Test the new admin credentials:
+
+mongosh -u adminUser -p newSecurePassword --authenticationDatabase admin
+
+use admin
+db.createUser({
+  user: "mongoAdmin",
+  pwd: "Q03p945eIh65dVoB",
+  roles: [ { role: "root", db: "admin" } ]
+})
+
+mongosh "mongodb://mongoAdmin:Q03p945eIh65dVoB@127.0.0.1:27017/admin?authSource=admin"
+
+mongosh --username mongoAdmin --password 'Q03p945eIh65dVoB!' --authenticationDatabase admin
+
+MONGODB_URI="mongodb://mongoAdmin:Q03p945eIh65dVoB@127.0.0.1:27017/admin?authSource=admin"
+
+
+// now, create a user:
+
+use {project}_db
+db.createUser(
+  {
+    user: "{project}_user",
+    pwd: "yourSecurePassword",  // use a different secure password
+    roles: [
+      { role: "readWrite", db: "{project}_db" }
+    ]
+  }
+)
+https://claude.ai/chat/c85ae11f-20ca-4fd2-a231-5cb7385cb0c9

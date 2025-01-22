@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 const path = require('path');
 const cors = require('cors');
 const morgan = require('morgan');
+const { logger } = require('./utils/logger');
 
 const app = express();
 
@@ -16,11 +17,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Debug middleware to log all requests
 app.use((req, res, next) => {
-  console.log('Incoming request:', {
+  logger.info('Incoming request:', {
     method: req.method,
     path: req.path,
     url: req.url,
-    // headers: req.headers
   });
   next();
 });
@@ -74,15 +74,14 @@ app.use((err, req, res, next) => {
 
 // Connect to MongoDB and start server
 if (require.main === module) {
-  mongoose.connect(process.env.MONGO_URI)
+  connectDB()
     .then(() => {
-      console.log('Connected to MongoDB');
       app.listen(process.env.PORT || 5015, () => {
-        console.log(`Server running on port ${process.env.PORT || 5029}`);
+        logger.info(`Server running on port ${process.env.PORT || 5015}`);
       });
     })
     .catch((error) => {
-      console.error('MongoDB connection error:', error);
+      logger.error('Server startup error:', error);
       process.exit(1);
     });
 }
